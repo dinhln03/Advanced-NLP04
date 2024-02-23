@@ -205,7 +205,6 @@ class Trainer:
         sampler=sampler,
         collate_fn=DataCollatorForSeq2Seq(
             tokenizer,
-            model_name_or_path=tokenizer.model_max_length,  # Use model's max length for padding
             pad_to_multiple_of=8,
             return_tensors="pt",
         ),
@@ -226,7 +225,6 @@ class Trainer:
         sampler=sampler,
         collate_fn=DataCollatorForSeq2Seq(
             tokenizer,
-            model_name_or_path=tokenizer.model_max_length,  # Use model's max length for padding
             pad_to_multiple_of=8,
             return_tensors="pt",
         ),
