@@ -201,10 +201,10 @@ class Trainer:
         sampler = DistributedSampler(train_dataset) if self.is_ddp_training else None
         data_trainloader = DataLoader(
         train_dataset,
-        batch_size=batch_size,
+        batch_size=self.batch_size,
         sampler=sampler,
         collate_fn=DataCollatorForSeq2Seq(
-            tokenizer,
+            self.tokenizer,
             pad_to_multiple_of=8,
             return_tensors="pt",
         ),
@@ -218,13 +218,13 @@ class Trainer:
 
         ### YOUR CODE HERE ###
 
-        sampler = SequentialSampler(eval_dataset)
+        sampler = SequentialSampler(len(eval_dataset))
         data_testloader = DataLoader(
         eval_dataset,
-        batch_size=batch_size,
+        batch_size=self.batch_size,
         sampler=sampler,
         collate_fn=DataCollatorForSeq2Seq(
-            tokenizer,
+            self.tokenizer,
             pad_to_multiple_of=8,
             return_tensors="pt",
         ),
