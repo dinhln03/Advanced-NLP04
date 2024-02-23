@@ -312,20 +312,18 @@ def load_pretrained_model(local_rank, model_path: str = ""):
     # and trust_remote_code=True.
 
     ### YOUR CODE HERE ###
-
-    model = None 
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path, trust_remote_code=True, device_map={"": torch.device(f"cuda:{local_rank}")})
 
     # TODO: Create a LoraConfig with the parameters: 
     # r=4, lora_alpha=8, lora_dropout=0.05, bias="none", task_type="CAUSAL_LM", target_modules=['lm_head.linear', 'transformer.embd.wte'].
     # We will then use the config to initialize a LoraModelForCasualLM with the loaded model.
-
+    
     ### YOUR CODE HERE ###
-
-    lora_config = None 
-
+    lora_config = LoraConfig(
+        r=4, lora_alpha=8, lora_dropout=0.05, bias="none", task_type="CAUSAL_LM", target_modules=['lm_head.linear', 'transformer.embd.wte'])
     # TODO: Create LoRA model
-
-    model = None  # Apply current model to Lora Model
+    model = get_peft_model(model, lora_config)
 
     if _is_master_process():
         model.print_trainable_parameters()

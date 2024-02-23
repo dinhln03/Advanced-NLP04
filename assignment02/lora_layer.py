@@ -181,11 +181,11 @@ class Embedding(nn.Embedding, LoraLayer):
         # If adapters are disabled and there is an active adapter with rank > 0 and it is merged
         # Subtract the LoRA weights from the original weights and set merged to False
         if self.disable_adapters:
-            if self.r[self.active.adapter] > 0 and self.merged:
+            if self.r[self.active_adapter] > 0 and self.merged:
                 self.weight.data -= (
                     transpose(
-                        self.lora_embedding_B[self.active_adapter].weight
-                        @ self.lora_embedding_A[self.active_adapter].weight,
+                        self.lora_embedding_B[self.active_adapter]
+                        @ self.lora_embedding_A[self.active_adapter],
                         True,
                     )
                     * self.scaling[self.active_adapter]
@@ -262,11 +262,14 @@ class Linear(nn.Linear, LoraLayer):
             # flag to True.
             
             ### YOUR CODE HERE ###
-            self.weight.data += None
-            
-            ### YOUR CODE HERE ###
-            self.merged = None
+            self.weight.data += (
+                transpose(
+                    self.lora_B[self.active_adapter].weight @ self.lora_embedding_A[self.active_adapter].weight, self.fan_in_fan_out
+                )
+                * self.scaling[self.active_adapter]
+            )
 
+            self.merged = True
     def unmerge(self):
         # Separate low-rank approximation from original weights
         if self.active_adapter not in self.lora_A.keys():
@@ -300,9 +303,12 @@ class Linear(nn.Linear, LoraLayer):
             # TODO: If the LoRA adapter is active and not merged, add the output of the LoRA layers to the result. This involves
             # passing the input through lora_A, applying dropout, then passing it through lora_B. The output is scaled by the
             # LoRA scaling factor and added to the result.
-            
+            lora_A = self.lora_A[self.active_adapter]
+            lora_B = self.lora_B[self.active_adapter]
+            dropout = self.lora_dropout[self.active_adapter]
+            scaling = self.scaling[self.active_adapter]
             ### YOUR CODE HERE ###
-            result += None
+            result += lora_B(lora_A(dropout(x))) * scaling
         
         else:
             result = F.linear(x, transpose(self.weight, self.fan_in_fan_out), bias=self.bias)
@@ -314,3 +320,4 @@ class Linear(nn.Linear, LoraLayer):
 def transpose(weight, fan_in_fan_out):
     # Helper function to transpose weights if required
     return weight.T if fan_in_fan_out else weight
+
