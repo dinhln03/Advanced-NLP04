@@ -103,7 +103,7 @@ class Trainer:
             Loss value for the batch.
         """
 
-        with self.ctx:
+        with self.ctx as ctx:
             outputs = self.model(**batch)
             loss = outputs.loss / self.gradient_accumulation_steps  # Normalize loss
         loss_val = loss.item()
@@ -218,7 +218,7 @@ class Trainer:
 
         ### YOUR CODE HERE ###
 
-        sampler = SequentialSampler(len(eval_dataset))
+        sampler = SequentialSampler(eval_dataset)
         data_testloader = DataLoader(
         eval_dataset,
         batch_size=self.batch_size,
