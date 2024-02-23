@@ -103,9 +103,9 @@ class Trainer:
             Loss value for the batch.
         """
 
-        with self.ctx as ctx:
-            outputs = self.model(**batch)
-            loss = outputs.loss / self.gradient_accumulation_steps  # Normalize loss
+        
+        outputs = self.model(**batch)
+        loss = outputs.loss / self.gradient_accumulation_steps  # Normalize loss
         loss_val = loss.item()
 
         # TODO: If 'mixed_precision_dtype' is torch.float16, you have to modify the backward using the gradscaler.
