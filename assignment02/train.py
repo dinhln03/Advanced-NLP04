@@ -79,8 +79,8 @@ class Trainer:
         else:
         
             # TODO Otherwise, use 'torch.amp.autocast' context with the specified dtype, and initialize GradScaler if mixed_precision_dtype is float16.
-            self.ctx = None
-            self.gradscaler = None
+            self.ctx = torch.amp.autocast(dtype=mixed_precision_dtype)
+            self.gradscaler = torch.cuda.amp.GradScaler()
 
     def _set_ddp_training(self):
 
@@ -112,6 +112,7 @@ class Trainer:
         if self.mixed_precision_dtype == torch.float16:
 
             ### YOUR CODE HERE ###
+            self.gradscaler.scale(loss).backward()
             
             pass
         else:
@@ -159,8 +160,10 @@ class Trainer:
                     ### YOUR CODE HERE ###
                     
                     # TODO: optimizer step
+                    self.gradscaler.step(self.optimizer)
 
                     # TODO: update scaler factor
+                    self.gradscaler.update()
 
                     pass
                 else:
