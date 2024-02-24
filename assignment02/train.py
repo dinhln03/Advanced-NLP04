@@ -346,7 +346,8 @@ def load_pretrained_model(local_rank, model_path: str = ""):
     lora_config = LoraConfig(
         r=4, lora_alpha=8, lora_dropout=0.05, bias="none", task_type="CAUSAL_LM", target_modules=['lm_head.linear', 'transformer.embd.wte'])
     # TODO: Create LoRA model
-    model = get_peft_model(model, lora_config)
+    # model = get_peft_model(model, lora_config)
+    model = LoraModelForCasualLM(model, lora_config)
 
     if _is_master_process():
         model.print_trainable_parameters()

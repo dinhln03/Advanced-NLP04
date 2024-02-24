@@ -264,7 +264,7 @@ class Linear(nn.Linear, LoraLayer):
             ### YOUR CODE HERE ###
             self.weight.data += (
                 transpose(
-                    self.lora_B[self.active_adapter].weight @ self.lora_embedding_A[self.active_adapter].weight, self.fan_in_fan_out
+                    self.lora_B[self.active_adapter].weight @ self.lora_A[self.active_adapter].weight, self.fan_in_fan_out
                 )
                 * self.scaling[self.active_adapter]
             )
