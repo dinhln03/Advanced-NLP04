@@ -23,7 +23,8 @@ import warnings
 warnings.filterwarnings('ignore')
 torch.manual_seed(42)
 torch.backends.cudnn.deterministic = True
-
+torch.backends.cuda.matmul.allow_tf32 = True # allow tf32 on matmul
+torch.backends.cudnn.allow_tf32 = True # allow tf32 on cudnn
 
 class Trainer:
     def __init__(self,
@@ -79,8 +80,9 @@ class Trainer:
         else:
         
             # TODO Otherwise, use 'torch.amp.autocast' context with the specified dtype, and initialize GradScaler if mixed_precision_dtype is float16.
-            self.ctx = torch.amp.autocast(dtype=mixed_precision_dtype)
-            self.gradscaler = torch.cuda.amp.GradScaler()
+            
+            self.ctx = torch.autocast(device_type='cuda',dtype=mixed_precision_dtype)
+            self.gradscaler = torch.cuda.amp.GradScaler(enabled =True)
 
     def _set_ddp_training(self):
 
@@ -90,7 +92,7 @@ class Trainer:
 
         ### YOUR CODE HERE ###
 
-        self.model = None
+        self.model = DDP(self.model, device_ids=[self.gpu_id], output_device=self.gpu_id)
 
     def _run_batch(self, batch):
         """
@@ -110,7 +112,6 @@ class Trainer:
 
         # TODO: If 'mixed_precision_dtype' is torch.float16, you have to modify the backward using the gradscaler.
         if self.mixed_precision_dtype == torch.float16:
-
             ### YOUR CODE HERE ###
             self.gradscaler.scale(loss).backward()
             
@@ -388,9 +389,11 @@ if __name__ == "__main__":
     if distributed_strategy == "ddp":
 
         # TODO: Initialize the process group for distributed data parallelism with nccl backend.
+        init_process_group(backend=backend)
         # After that, you should set the 'local_rank' from the environment variable 'LOCAL_RANK'.
-
+        local_rank = int(os.environ['LOCAL_RANK'])
         # Initialize the process group
+        
 
         ### YOUR CODE HERE ###
         
